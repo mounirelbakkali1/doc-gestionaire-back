@@ -45,7 +45,7 @@ public class LoginController {
                             request.username(), request.password()));
             User user = (User) authentication.getPrincipal();
             String accessToken = jwtUtil.generateAccessToken(user);
-            AuthResponse response = new AuthResponse(user.getUsername(), accessToken);
+            AuthResponse response = new AuthResponse(user.getUsername(),user.getRoles(), accessToken);
             return ResponseEntity.ok().body(response);
         } catch (BadCredentialsException ex) {
             return ResponseEntity.badRequest()
@@ -67,12 +67,12 @@ public class LoginController {
         User user = User.builder()
                 .username(request.getUsername())
                 .password(encoder.encode(request.getPassword()))
-                .role("USER")
+                .roles(new HashSet<>())
                 .enabled(true)
                 .userAuthorities(new HashSet<>())
                 .name(request.getName())
                 .build();
-        user.addAuthority("READ");
+        user.addRole("ROLE_REFERENT");
         userRepository.save(user);
         return ResponseEntity.ok(new CustomResponse<>("User registered successfully!", user.getUsername()));
     }

@@ -1,6 +1,7 @@
 package ma.gestionnaire.DocGestionnaire.utilities;
 
 import io.jsonwebtoken.*;
+import ma.gestionnaire.DocGestionnaire.entities.Role;
 import ma.gestionnaire.DocGestionnaire.entities.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 
 @Component
 public class JwtTokenUtil {
@@ -25,6 +27,7 @@ public class JwtTokenUtil {
         return Jwts.builder()
                 .setSubject(String.format("%s,%s", user.getUsername(), user.getId()))
                 .setIssuer("CodeJava")
+                .claim("roles",user.getRoles())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)

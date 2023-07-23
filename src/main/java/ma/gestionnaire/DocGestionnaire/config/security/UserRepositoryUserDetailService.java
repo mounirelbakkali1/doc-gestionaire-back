@@ -34,9 +34,9 @@ public class UserRepositoryUserDetailService implements UserDetailsService {
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {
-            return super.getUserAuthorities()
+            return super.getRoles()
                     .stream()
-                    .map(userAuth -> new SimpleGrantedAuthority(userAuth.getAuthority()))
+                    .map(userAuth -> new SimpleGrantedAuthority(userAuth.getName()))
                     .collect(Collectors.toList());
         }
 

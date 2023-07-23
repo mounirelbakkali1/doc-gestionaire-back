@@ -3,9 +3,8 @@ package ma.gestionnaire.DocGestionnaire.service.imp;
 import ma.gestionnaire.DocGestionnaire.dto.DocumentDto;
 import ma.gestionnaire.DocGestionnaire.entities.Document;
 import ma.gestionnaire.DocGestionnaire.exception.ResourceNotFoundException;
-import ma.gestionnaire.DocGestionnaire.repositories.DocumentRepositorie;
+import ma.gestionnaire.DocGestionnaire.repositories.DocumentRepository;
 import ma.gestionnaire.DocGestionnaire.service.DocumentService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 public class DocumentServiceImp implements DocumentService {
 
     @Autowired
-    private DocumentRepositorie documentRepositorie;
+    private DocumentRepository documentRepositorie;
 
     @Override
     public DocumentDto create(DocumentDto documentDto) {
@@ -31,10 +30,6 @@ public class DocumentServiceImp implements DocumentService {
         documentDto.setId(document.getId());
 
         documentDto.setTitre(document.getTitre());
-        documentDto.setLangue(document.getLangue());
-        documentDto.setResume(document.getResume());
-        documentDto.setPictureName(document.getPicture());
-        documentDto.setFileName(document.getFile());
 
         return documentDto;
     }
@@ -42,14 +37,8 @@ public class DocumentServiceImp implements DocumentService {
     public Document mapDTO_TO_entitie(DocumentDto documentDto) {
 
         Document document = new Document();
-
         document.setId(documentDto.getId());
-
         document.setTitre(documentDto.getTitre());
-        document.setLangue(documentDto.getLangue());
-        document.setResume(documentDto.getResume());
-        document.setPicture(documentDto.getPictureName());
-        document.setFile(documentDto.getFileName());
         return document;
     }
 

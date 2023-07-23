@@ -26,7 +26,9 @@ public class User {
     String password;
     boolean enabled = true;
 
-    private String role;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
     private String name;
 
     @OneToMany(cascade = ALL, fetch = EAGER)
@@ -44,12 +46,16 @@ public class User {
         this.password = user.password;
         this.name = user.name;
         this.enabled = user.enabled;
-        this.role = user.role;
+        this.roles = new HashSet<>(user.roles);
         this.userAuthorities = new HashSet<>(user.userAuthorities);
     }
 
     public void addAuthority(String authority) {
         this.userAuthorities.add(new UserAuthority(this, authority));
+    }
+
+    public void addRole(String role) {
+        this.roles.add(new Role(role));
     }
 
 }

@@ -1,14 +1,13 @@
 package ma.gestionnaire.DocGestionnaire.entities;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import jakarta.persistence.*;
 
 @Entity
-
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Document {
@@ -17,8 +16,8 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String titre;
-    private String langue;
-    private String resume;
-    private String picture;
-    private String file;
+
+    @ManyToOne
+    @JsonIgnore
+    private TypeDemande typeDemande;
 }

@@ -11,9 +11,5 @@ public class DocumentDto {
 
     private Long id;
     private String titre;
-    private String langue;
-    private String resume;
-    private String pictureName;
-    private String fileName;
 
 }

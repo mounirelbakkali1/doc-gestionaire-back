@@ -3,16 +3,24 @@ package ma.gestionnaire.DocGestionnaire.config.security;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import ma.gestionnaire.DocGestionnaire.config.security.JwtTokenFilter;
+import ma.gestionnaire.DocGestionnaire.entities.BridgeUser;
+import ma.gestionnaire.DocGestionnaire.repositories.UserRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -24,41 +32,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    JwtTokenFilter jwtTokenFilter;
+    private final JwtTokenFilter jwtTokenFilter;
 
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
+    private final AuthEntryPointJwt unauthorizedHandler;
+
+    private final UserDetailsService userDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeHttpRequests((a) -> {
-                    try {
-                        a
-                                .requestMatchers("/api/auth/**").permitAll()
-
-                                // .requestMatchers(HttpMethod.GET,"/api/v1/users").authenticated()
-                                .requestMatchers(HttpMethod.GET, "/api/v1/**").hasAnyRole("USER","ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/v1/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/**").hasRole("ADMIN")
-                                .anyRequest().authenticated()
-                                .and().oauth2ResourceServer(oauth2 -> oauth2.jwt());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http
+                .cors().and().csrf().disable()
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .authorizeHttpRequests()
+                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                // .requestMatchers("/api/v1/parametrages/**").hasRole("ADMIN")
+                // .requestMatchers("/api/v1/referencement/**").hasAnyRole("ADMIN","REFERENT")
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider());
         return http.build();
-    }
-
-    private Filter authenticationJwtTokenFilter() {
-        return jwtTokenFilter;
     }
 
     @Bean
@@ -76,4 +73,13 @@ public class SecurityConfig {
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
+
 }

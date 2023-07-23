@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ma.gestionnaire.DocGestionnaire.entities.Role;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -11,5 +14,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AuthResponse {
     private String username;
+    private Set<Role> roles ;
     private String accessToken;
 }
