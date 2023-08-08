@@ -1,5 +1,7 @@
 package ma.gestionnaire.DocGestionnaire.entities;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -17,7 +19,7 @@ public class Document {
     private Long id;
     private String titre;
 
-    @ManyToOne
+    @ManyToMany
     @JsonIgnore
-    private TypeDemande typeDemande;
+    private List<Demande> demande;
 }
